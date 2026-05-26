@@ -1,0 +1,63 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_TOKEN
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set release version
+        run: mvn --batch-mode versions:set -DnewVersion=${{ steps.version.outputs.VERSION }} -DgenerateBackupPoms=false
+
+      - name: Build, verify and publish
+        run: mvn --batch-mode deploy -DskipTests=false
+        env:
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIDEAS_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: "${{ github.ref_name }}"
+          body: |
+            ## skideas-common-core ${{ github.ref_name }}
+
+            Published to GitHub Packages: `com.skideas:common-core:${{ steps.version.outputs.VERSION }}`
+
+            ### Usage
+            ```xml
+            <dependency>
+              <groupId>com.skideas</groupId>
+              <artifactId>common-core</artifactId>
+              <version>${{ steps.version.outputs.VERSION }}</version>
+            </dependency>
+            ```
+          draft: false
+          prerelease: false
