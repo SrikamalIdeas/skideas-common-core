@@ -15,6 +15,7 @@ Shared infrastructure library for all `SrikamalIdeas` projects.
 | `com.skideas.common.converter` | `EncryptedStringConverter` (AES-256-GCM) |
 | `com.skideas.common.util` | `IdGenerator`, `DateTimeUtils`, `StringSanitizer`, `TraceIdProvider` |
 | `com.skideas.common.entity` | `AuditableEntity` (`@MappedSuperclass`) |
+| `com.skideas.common.repository` | `BaseRepository`, `BaseRepositoryImpl`, dynamic filter/paging infrastructure |
 
 ---
 
@@ -51,7 +52,7 @@ Set `GITHUB_PACKAGES_TOKEN` in your shell to a GitHub classic PAT with `read:pac
 <dependency>
   <groupId>com.skideas</groupId>
   <artifactId>common-core</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
